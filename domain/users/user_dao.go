@@ -1,21 +1,24 @@
 package users
 
 import (
+	"fmt"
 	"github.com/fajarkarim/bookstore-api-example-with-go/datasource/db_users"
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/fajarkarim/bookstore-api-example-with-go/errors"
+	"log"
 )
 
-func FindAll(c *gin.Context) {
+const tableName = "users"
+
+func FindAll() []User {
 	var (
 		user  User
 		users []User
 	)
-	const query = `SELECT * FROM users;`
+	query := fmt.Sprintf(`SELECT * FROM %s;`, tableName)
 	rows, err := db_users.Client.Query(query)
 
 	if err != nil {
-		panic(err)
+		errors.NewInternalServerError("Failed Query to Database", err)
 	}
 
 	for rows.Next() {
@@ -25,5 +28,21 @@ func FindAll(c *gin.Context) {
 	}
 
 	defer rows.Close()
-	c.JSON(http.StatusOK, users)
+	return users
+}
+
+func FindById(userID string) User {
+	var user User
+	const query = `SELECT * FROM users where id = ?;`
+
+	row := db_users.Client.QueryRow(query, userID)
+
+	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated,
+		&user.Password, &user.Status)
+
+	if err != nil {
+		log.Println("error ", err)
+	}
+
+	return user
 }
