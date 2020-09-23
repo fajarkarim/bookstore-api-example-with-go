@@ -14,8 +14,7 @@ func init() {
 	dataSourceName := "root:@tcp(localhost:3306)/db_users?charset=utf8"
 
 	var err error
-	Client, err := sql.Open("msql", dataSourceName)
-
+	Client, err = sql.Open("mysql", dataSourceName)
 	if err != nil {
 		panic(err)
 	}
